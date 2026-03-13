@@ -56,38 +56,39 @@ export default function ManageServicesTab({ services, onSuccess }: ManageService
       return
     }
 
-    // Reorder services
+    // Reorder services - swap positions
     const draggedIndex = services.findIndex((s) => s.id === draggingId)
     const targetIndex = services.findIndex((s) => s.id === targetId)
-
-    if (draggedIndex < targetIndex) {
-      // Moving down
-      for (let i = draggedIndex; i < targetIndex; i++) {
-        const newOrder = services[i].display_order
-        services[i].display_order = services[i + 1].display_order
-      }
-      services[targetIndex].display_order = newOrder
-    } else {
-      // Moving up
-      for (let i = draggedIndex; i > targetIndex; i--) {
-        const newOrder = services[i].display_order
-        services[i].display_order = services[i - 1].display_order
-      }
-      services[targetIndex].display_order = newOrder
+    
+    if (draggedIndex === -1 || targetIndex === -1) {
+      setDraggingId(null)
+      return
     }
 
-    // Update all affected services
+    // Swap display_order values
+    const draggedOrder = services[draggedIndex].display_order
+    const targetOrder = services[targetIndex].display_order
+
+    // Update in the database
     try {
-      for (let i = Math.min(draggedIndex, targetIndex); i <= Math.max(draggedIndex, targetIndex); i++) {
-        await fetch('/api/services', {
+      await Promise.all([
+        fetch('/api/services', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            id: services[i].id,
-            display_order: services[i].display_order,
+            id: services[draggedIndex].id,
+            display_order: targetOrder,
           }),
-        })
-      }
+        }),
+        fetch('/api/services', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: services[targetIndex].id,
+            display_order: draggedOrder,
+          }),
+        }),
+      ])
       onSuccess()
     } catch (error) {
       console.error('[v0] Reorder error:', error)
