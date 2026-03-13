@@ -1,11 +1,8 @@
 'use client'
 
 import { SignUp } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 
 export default function SignUpPage() {
-  const router = useRouter()
-
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
@@ -13,7 +10,9 @@ export default function SignUpPage() {
         <p className="text-slate-400">Join NexusCluster to monitor your services</p>
       </div>
       <SignUp
-        afterSignUpUrl="/"
+        routing="path"
+        path="/auth/sign-up"
+        fallbackRedirectUrl="/"
         appearance={{
           elements: {
             rootBox: 'w-full',
