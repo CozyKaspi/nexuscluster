@@ -1,12 +1,21 @@
+export type StatusType = 'atlassian' | 'downdetector'
+
+export const STATUS_TYPE_LABELS: Record<StatusType, string> = {
+  atlassian: 'Atlassian Statuspage',
+  downdetector: 'DownDetector',
+}
+
 export interface Service {
   id: string;
   user_id: string;
   name: string;
-  url: string;
-  category: string;
-  icon?: string;
+  description?: string;
+  status_url: string;
+  api_url: string;
+  logo_domain?: string;
+  status_type: StatusType;
   status: "operational" | "degraded" | "outage" | "unknown";
-  latency?: number;
+  display_order: number;
   last_checked?: string;
   created_at: string;
 }

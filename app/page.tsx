@@ -77,37 +77,8 @@ export default function Dashboard() {
     }
   }
 
-  const handleAddService = async (name: string, url: string) => {
-    try {
-      const response = await fetch('/api/services', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, url }),
-      })
-
-      if (response.ok) {
-        const { service } = await response.json()
-        setServices([...services, service])
-      }
-    } catch (error) {
-      console.error('Failed to add service:', error)
-    }
-  }
-
-  const handleDeleteService = async (id: string) => {
-    try {
-      const response = await fetch('/api/services', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      })
-
-      if (response.ok) {
-        setServices(services.filter((s) => s.id !== id))
-      }
-    } catch (error) {
-      console.error('Failed to delete service:', error)
-    }
+  const handleRefreshServices = () => {
+    fetchServices()
   }
 
   if (!isLoaded || !isSignedIn) {
@@ -129,39 +100,29 @@ export default function Dashboard() {
       <div className="relative min-h-screen">
         {/* Header */}
         <header className="border-b border-slate-700/30 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">NC</span>
-              </div>
-              <h1 className="text-2xl font-bold text-white">NexusCluster</h1>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setSettingsOpen(true)}
-                className="p-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                aria-label="Open settings"
-              >
-                <Settings size={20} />
-              </button>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: 'w-10 h-10',
-                  },
-                }}
-              />
-            </div>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-end gap-4">
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="p-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+              aria-label="Open settings"
+            >
+              <Settings size={20} />
+            </button>
+            <UserButton
+              appearance={{
+                elements: {
+                  avatarBox: 'w-10 h-10',
+                },
+              }}
+            />
           </div>
         </header>
 
         {/* Main Content */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Welcome Section */}
+          {/* Services Header */}
           <div className="mb-12">
-            <h2 className="text-4xl font-bold text-white mb-2">Welcome back, {user?.firstName}! 👋</h2>
-            <p className="text-slate-400">Monitor all your services in one place</p>
+            <h2 className="text-4xl font-bold text-white">All your services in one place</h2>
           </div>
 
           {/* Services Grid */}
@@ -185,7 +146,6 @@ export default function Dashboard() {
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  onDelete={handleDeleteService}
                 />
               ))}
             </div>
@@ -196,8 +156,8 @@ export default function Dashboard() {
       <SettingsModal
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onWallpaperUpload={handleWallpaperUpload}
-        onAddService={handleAddService}
+        services={services}
+        onServicesChange={handleRefreshServices}
         wallpaperImage={wallpaperImage}
       />
     </div>
