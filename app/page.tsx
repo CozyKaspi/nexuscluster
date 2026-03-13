@@ -46,10 +46,12 @@ export default function Dashboard() {
 
   const fetchWallpaper = async () => {
     try {
-      const response = await fetch('/api/services')
+      const response = await fetch('/api/user-settings')
       if (response.ok) {
-        // Note: In a real app, we'd get wallpaper info from user settings
-        // For now, we'll just load it if it exists
+        const { settings } = await response.json()
+        if (settings?.wallpaper_url) {
+          setWallpaperImage(`/api/wallpaper?pathname=${encodeURIComponent(settings.wallpaper_url)}`)
+        }
       }
     } catch (error) {
       console.error('Failed to fetch wallpaper:', error)

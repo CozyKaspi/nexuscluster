@@ -10,7 +10,9 @@ export default function LoginPage() {
         <p className="text-slate-400">Sign in to your NexusCluster account</p>
       </div>
       <SignIn
-        afterSignInUrl="/"
+        routing="path"
+        path="/auth/login"
+        fallbackRedirectUrl="/"
         appearance={{
           elements: {
             rootBox: 'w-full',
