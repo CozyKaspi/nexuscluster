@@ -15,7 +15,7 @@ export async function GET() {
       .from('services')
       .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('display_order', { ascending: true })
 
     if (error) {
       console.error('[v0] Database error fetching services:', error)
@@ -38,23 +38,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { name, url, category } = await request.json()
-    console.log('[v0] Adding service:', { name, url, category, userId })
+    const { name, description, status_url, api_url, logo_domain, status_type } = await request.json()
+    console.log('[v0] Adding service:', { name, status_type, userId })
 
-    if (!name || !url) {
+    if (!name || !status_url || !api_url || !status_type) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const supabase = createAdminClient()
+    
+    // Get the next display_order
+    const { data: lastService } = await supabase
+      .from('services')
+      .select('display_order')
+      .eq('user_id', userId)
+      .order('display_order', { ascending: false })
+      .limit(1)
+
+    const nextOrder = (lastService?.[0]?.display_order ?? -1) + 1
+
     const { data, error } = await supabase
       .from('services')
       .insert([
         {
           user_id: userId,
           name,
-          url,
-          category: category || 'other',
+          description: description || null,
+          status_url,
+          api_url,
+          logo_domain: logo_domain || null,
+          status_type,
           status: 'unknown',
+          display_order: nextOrder,
         },
       ])
       .select()
@@ -69,6 +84,40 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[v0] Add service error:', error)
     return NextResponse.json({ error: 'Failed to add service' }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: NextRequest) {
+  try {
+    const { userId } = await auth()
+
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { id, display_order } = await request.json()
+
+    if (!id || display_order === undefined) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    const supabase = createAdminClient()
+    const { error } = await supabase
+      .from('services')
+      .update({ display_order })
+      .eq('id', id)
+      .eq('user_id', userId)
+
+    if (error) {
+      console.error('[v0] Database error updating order:', error)
+      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
+    }
+
+    console.log('[v0] Service order updated')
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('[v0] Update order error:', error)
+    return NextResponse.json({ error: 'Failed to update order' }, { status: 500 })
   }
 }
 
