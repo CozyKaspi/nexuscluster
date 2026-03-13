@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Service } from '@/lib/types'
 import { cn } from '@/lib/cn'
-import { X, ImageIcon, Plus, Menu3 } from 'lucide-react'
+import { X, ImageIcon, Plus, Menu } from 'lucide-react'
 import BackgroundTab from './settings/background-tab'
 import AddServiceTab from './settings/add-service-tab'
 import ManageServicesTab from './settings/manage-services-tab'
@@ -72,7 +72,7 @@ export function SettingsModal({
                 : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
             )}
           >
-            <Menu3 size={20} className="flex-shrink-0" />
+            <Menu size={20} className="flex-shrink-0" />
             <span>Manage</span>
           </button>
         </div>
